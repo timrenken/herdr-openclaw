@@ -62,7 +62,7 @@ function reconcile() {
   for (const pane of listPanes()) {
     const paneId = pane.pane_id;
     if (!paneId || pane.agent !== "openclaw") continue;
-    if (isOpenClawPane(paneId)) continue;
+    if (isOpenClawPane(paneId, pane)) continue;
     releaseAgent(paneId);
     released += 1;
   }

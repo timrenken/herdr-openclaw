@@ -190,7 +190,7 @@ function discover(panes) {
     if (!paneId || tracked.has(paneId)) continue;
     // 已被别的 source 认领的 pane 不碰 —— 那是 claude/codex 的地盘。
     if (pane.agent && pane.agent !== "openclaw") continue;
-    if (isOpenClawPane(paneId)) found.push(paneId);
+    if (isOpenClawPane(paneId, pane)) found.push(paneId);
   }
   return found;
 }
@@ -214,7 +214,7 @@ function tick() {
   for (const paneId of [...tracked.keys()]) {
     // pane 没了，或前台已经不是 OpenClaw（用户退出 TUI 回到 shell）—— 交还 authority，
     // 别占着让 herdr 以为还有 agent 在跑。
-    if (!byId.has(paneId) || !isOpenClawPane(paneId)) {
+    if (!byId.has(paneId) || !isOpenClawPane(paneId, byId.get(paneId))) {
       releaseAgent(paneId);
       tracked.delete(paneId);
       log(paneId, "released");
