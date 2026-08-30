@@ -61,7 +61,7 @@ function reconcile() {
   let released = 0;
   for (const pane of listPanes()) {
     const paneId = pane.pane_id;
-    if (!paneId || pane.agent !== "openclaw") continue;
+    if (!paneId || !["openclaw", "tony"].includes(pane.agent)) continue;
     if (isOpenClawPane(paneId, pane)) continue;
     releaseAgent(paneId);
     released += 1;
