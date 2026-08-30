@@ -29,7 +29,7 @@ function withEnv(env, fn) {
 test("herdr 注入 HERDR_PLUGIN_STATE_DIR 时以它为准", () => {
   withEnv({ HERDR_PLUGIN_STATE_DIR: "/tmp/injected" }, () => {
     assert.equal(stateDir(), "/tmp/injected");
-    assert.equal(pidFile(), "/tmp/injected/watch.pid");
+    assert.equal(pidFile(), join("/tmp/injected", "watch.pid"));
   });
 });
 
@@ -42,6 +42,6 @@ test("从 shell 直接跑（没有注入）时落到 herdr 约定路径，而不
 
 test("尊重 XDG_STATE_HOME", () => {
   withEnv({ HERDR_PLUGIN_STATE_DIR: undefined, XDG_STATE_HOME: "/tmp/xdg" }, () => {
-    assert.equal(stateDir(), "/tmp/xdg/herdr/plugins/herdr-openclaw");
+    assert.equal(stateDir(), join("/tmp/xdg", "herdr", "plugins", "herdr-openclaw"));
   });
 });

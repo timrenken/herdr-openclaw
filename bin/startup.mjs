@@ -3,7 +3,7 @@
 // exit_code/stdout/stderr（见 docs/findings-2026-08-12.md §9），把长驻循环直接
 // 挂在这里会拖住插件启动。所以这里只做两件事：对账、把 watcher 甩到后台。
 
-import { spawn, spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import {
   existsSync,
   mkdirSync,
@@ -17,6 +17,7 @@ import { fileURLToPath } from "node:url";
 
 import { listPanes, isOpenClawPane, releaseAgent } from "../lib/herdr.mjs";
 import { logFile, pidFile, stateDir } from "../lib/paths.mjs";
+import { isWatcherProcess, sleepSync, terminateProcess } from "../lib/process.mjs";
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const STATE_DIR = stateDir();
@@ -38,9 +39,7 @@ function alive(pid) {
  * 就会把那个无辜进程 SIGTERM 掉。校验命令行里有没有 watch.mjs。
  */
 function isOurWatcher(pid) {
-  const r = spawnSync("ps", ["-p", String(pid), "-o", "command="], { encoding: "utf8" });
-  if (r.status !== 0) return false;
-  return /watch\.mjs/.test(r.stdout ?? "");
+  return isWatcherProcess(pid);
 }
 
 /** 等进程真的消失。SIGTERM 是异步的，不等就 spawn 会撞上它的 shutdown。 */
@@ -48,7 +47,7 @@ function waitForExit(pid, timeoutMs = 5000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (!alive(pid)) return true;
-    spawnSync("sleep", ["0.1"]);
+    sleepSync(100);
   }
   return !alive(pid);
 }
@@ -81,11 +80,7 @@ function stopStaleWatcher() {
       // pid 被复用了，绝不能杀。
       note = `pid ${pid} 已被无关进程占用，跳过 kill`;
     } else {
-      try {
-        process.kill(pid, "SIGTERM");
-      } catch {
-        /* 竞态：刚好自己退了 */
-      }
+      terminateProcess(pid);
       // **必须等它退干净再起新的。** 旧 watcher 的 shutdown 会 release 它
       // tracked 的所有 pane；不等的话新 watcher 可能刚接管完就被旧的 release 掉，
       // 而新 watcher 的 tracked 已记下状态、不会重报 —— 该 pane 就此丢失归属。

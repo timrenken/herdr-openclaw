@@ -24,19 +24,21 @@ verified — is in [`docs/findings-2026-08-12.md`](docs/findings-2026-08-12.md).
 - herdr **0.8.0+** (`pane report-agent` and friends)
 - OpenClaw **2026.7.x** (status-line format; see [Upstream drift](#upstream-drift))
 - Node **20+**
-- macOS. Nothing in the code is macOS-specific — paths are XDG, signals are POSIX — but
-  Linux is untested, so `platforms` in the manifest is deliberately conservative.
+- macOS or Windows
+- On Windows, PowerShell is required for watcher process detection; the watcher uses
+  PowerShell/CIM and `taskkill` for process identity and shutdown.
 
 ## Install
 
 ```sh
-git clone https://github.com/gejiliang/herdr-openclaw.git
+git clone git@github.com:timrenken/herdr-openclaw.git
 herdr plugin link /path/to/herdr-openclaw --enabled
 herdr server reload-config
 ```
 
 The plugin's `[[startup]]` hook reconciles stale state and launches the watcher in the
-background. Verify:
+background. On Windows, use the same commands from PowerShell; paths may be regular
+Windows paths such as `C:\\Users\\Tim\\src\\herdr-openclaw`. Verify:
 
 ```sh
 herdr plugin list | grep herdr-openclaw
