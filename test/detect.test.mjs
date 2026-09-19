@@ -72,6 +72,14 @@ const REAL_CURRENT_WRAPPED = `
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 `;
 
+// Sanitized live capture: a non-TUI session id may carry a parenthetical
+// annotation before the info-field delimiter.
+const REAL_SESSION_ANNOTATION = `
+ connected | idle
+ agent tony (tony) | session main (mothy4286 user id:317462487354310666) |
+ deepseek-v4-flash high | deliver:off | tokens 128k/1.0m (13%)
+`;
+
 const withActivity = (a) => REAL_IDLE.replace("| idle", `| ${a}`);
 
 test("OpenClaw 2026.9.4 idle footer parses bare model/thinking and wrapped tokens", () => {
@@ -103,6 +111,17 @@ test("OpenClaw 2026.9.4 wrapped footer ignores delivery metadata", () => {
     ctx: "83k/258k 32%",
     think: "max",
   });
+});
+
+test("session annotations preserve the stable session id and parse footer metadata", () => {
+  const s = parseOpenClawStatus(REAL_SESSION_ANNOTATION);
+  assert.equal(s.agentName, "tony");
+  assert.equal(s.agentDisplayName, "tony");
+  assert.equal(s.sessionId, "main");
+  assert.equal(s.model, "deepseek-v4-flash");
+  assert.equal(s.think, "high");
+  assert.equal(s.tokens, "128k/1.0m");
+  assert.equal(s.tokenPct, 13);
 });
 
 test("解析真机 idle 采样", () => {

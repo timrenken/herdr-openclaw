@@ -31,7 +31,7 @@ verified — is in [`docs/findings-2026-08-12.md`](docs/findings-2026-08-12.md).
 ## Install
 
 ```sh
-herdr plugin install timrenken/herdr-openclaw --ref v0.2.2 --yes
+herdr plugin install timrenken/herdr-openclaw --ref v0.2.3 --yes
 herdr server reload-config
 ```
 

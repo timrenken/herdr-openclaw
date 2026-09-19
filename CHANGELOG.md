@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.3 - 2026-09-19
+
++- Parse session annotations in OpenClaw footers (e.g. `session main (mothy4286
++  user id:…)`), restoring per-pane identity display for agents whose sessions
++  include metadata in the session line.
++
 ## 0.2.2 - 2026-09-19
 
 - Refresh display identity metadata on first observation and identity changes, even when an
