@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.2 - 2026-09-19
+
+- Refresh display identity metadata on first observation and identity changes, even when an
+  OpenClaw pane has no model or context metadata to report.
+
 ## 0.2.1 - 2026-09-19
 
 - Parse the OpenClaw footer when `session` wraps before its `tui-…` identifier, preserving

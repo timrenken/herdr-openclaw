@@ -3,6 +3,7 @@ import { test } from "node:test";
 
 import { parseOpenClawStatus } from "../lib/detect.mjs";
 import { formatDisplayAgent } from "../lib/identity.mjs";
+import { metadataNeedsReport } from "../lib/metadata.mjs";
 
 test("formats each parsed footer identity as display name plus agent id", () => {
   const main = parseOpenClawStatus(
@@ -20,4 +21,31 @@ test("keeps a bare identity useful and falls back only when identity is missing"
   assert.equal(formatDisplayAgent(tony), "tony (tony)");
   assert.equal(formatDisplayAgent({}), "OpenClaw");
   assert.equal(formatDisplayAgent({ agentName: "  " }), "OpenClaw");
+});
+
+test("reports initial and changed display identity even without token metadata", () => {
+  const at = 1_000;
+  const refreshMs = 10_000;
+
+  assert.equal(
+    metadataNeedsReport(
+      { tokensKey: "", metaAt: at },
+      { tokensKey: "", displayAgent: "tony (tony)", now: at + 1, refreshMs },
+    ),
+    true,
+  );
+  assert.equal(
+    metadataNeedsReport(
+      { tokensKey: "", displayAgent: "tony (tony)", metaAt: at },
+      { tokensKey: "", displayAgent: "tony (tony)", now: at + 1, refreshMs },
+    ),
+    false,
+  );
+  assert.equal(
+    metadataNeedsReport(
+      { tokensKey: "", displayAgent: "OpenClaw", metaAt: at },
+      { tokensKey: "", displayAgent: "tony (tony)", now: at + 1, refreshMs },
+    ),
+    true,
+  );
 });

@@ -27,6 +27,7 @@ import {
 } from "../lib/herdr.mjs";
 import { buildStateLabels, buildTokens, parseOpenClawStatus } from "../lib/detect.mjs";
 import { formatDisplayAgent } from "../lib/identity.mjs";
+import { metadataNeedsReport } from "../lib/metadata.mjs";
 import { readConfig } from "../lib/plugin-config.mjs";
 import { applySoundPolicy, buildNotification, decideNotification } from "../lib/notify.mjs";
 
@@ -44,7 +45,7 @@ const META_REFRESH_MS = Math.floor(META_TTL_MS / 2);
 const VERBOSE = process.argv.includes("--verbose") || process.env.HERDR_OPENCLAW_VERBOSE === "1";
 const ONCE = process.argv.includes("--once");
 
-/** pane_id -> { state, sessionId, tokensKey, metaAt } 上一轮已上报的内容 */
+/** pane_id -> { state, sessionId, tokensKey, displayAgent, metaAt } 上一轮已上报的内容 */
 const tracked = new Map();
 
 function log(...args) {
@@ -97,7 +98,7 @@ function syncPane(paneId, pane = null) {
   // 这里显式检测：herdr 侧已经不认这个 pane 是 openclaw，就把记忆清掉重报一次。
   if (pane && pane.agent !== AGENT_LABEL) {
     log(paneId, `authority 丢失（herdr 侧 agent=${pane.agent ?? "无"}），重新接管`);
-    prev = { ...prev, state: null, tokensKey: "", metaAt: 0 };
+    prev = { ...prev, state: null, tokensKey: "", displayAgent: null, metaAt: 0 };
   }
 
   if (!status.matched) {
@@ -152,13 +153,13 @@ function syncPane(paneId, pane = null) {
 
   const tokens = buildTokens(status);
   const key = tokensKey(tokens);
+  const displayAgent = formatDisplayAgent(status);
   const now = Date.now();
-  const stale = now - (prev?.metaAt ?? 0) >= META_REFRESH_MS;
   let metaAt = prev?.metaAt ?? 0;
-  if (key !== prev?.tokensKey || stale) {
+  if (metadataNeedsReport(prev, { tokensKey: key, displayAgent, now, refreshMs: META_REFRESH_MS })) {
     metaAt = now;
     reportMetadata(paneId, {
-      displayAgent: formatDisplayAgent(status),
+      displayAgent,
       tokens,
       stateLabels: buildStateLabels(status),
       ttlMs: META_TTL_MS,
@@ -171,6 +172,7 @@ function syncPane(paneId, pane = null) {
     state: reportedState,
     sessionId: status.sessionId ?? prev?.sessionId ?? null,
     tokensKey: key,
+    displayAgent,
     metaAt,
     // run 结束后 busy 行就没了，所以只在还在跑的时候记；停下来时保留最后读数，
     // 供"跑完了"那条通知报用时。
