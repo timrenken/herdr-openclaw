@@ -5,7 +5,9 @@ import { parseOpenClawStatus } from "../lib/detect.mjs";
 import { formatDisplayAgent } from "../lib/identity.mjs";
 
 test("formats each parsed footer identity as display name plus agent id", () => {
-  const main = parseOpenClawStatus("connected | idle\nagent main (Lumen) | session tui-main\n");
+  const main = parseOpenClawStatus(
+    "connected | idle\nagent main (Lumen) | session\ntui-main | gpt-5.6-terra low | deliver:off | tokens 1k/2k (50%)\n",
+  );
   assert.equal(formatDisplayAgent(main), "Lumen (main)");
 
   const amelia = parseOpenClawStatus("connected | idle\nagent amelia (amelia) | session tui-amelia\n");

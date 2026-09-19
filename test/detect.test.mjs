@@ -60,8 +60,8 @@ const REAL_BUSY = `
 // Conversation text and user identifiers are intentionally omitted; only the TUI footer is retained.
 const REAL_CURRENT_IDLE = `
  connected | idle
- agent main (Lumen) | session tui-9fcee887-2397-44e5-b391-a498de816ba0 | gpt-5.6-terra low | deliver:off | tokens
- 114k/258k (44%)
+ agent main (Lumen) | session
+ tui-9fcee887-2397-44e5-b391-a498de816ba0 | gpt-5.6-terra low | deliver:off | tokens 114k/258k (44%)
 ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 `;
 
@@ -76,6 +76,9 @@ const withActivity = (a) => REAL_IDLE.replace("| idle", `| ${a}`);
 
 test("OpenClaw 2026.9.4 idle footer parses bare model/thinking and wrapped tokens", () => {
   const s = parseOpenClawStatus(REAL_CURRENT_IDLE);
+  assert.equal(s.agentName, "main");
+  assert.equal(s.agentDisplayName, "Lumen");
+  assert.equal(s.sessionId, "tui-9fcee887-2397-44e5-b391-a498de816ba0");
   assert.equal(s.model, "gpt-5.6-terra");
   assert.equal(s.think, "low");
   assert.equal(s.tokens, "114k/258k");

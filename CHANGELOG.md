@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1 - 2026-09-19
+
+- Parse the OpenClaw footer when `session` wraps before its `tui-…` identifier, preserving
+  per-pane display identities such as `Lumen (main)` in narrow Herdr panes.
+
 ## 0.2.0 - 2026-09-19
 
 - Parse OpenClaw 2026.9.4 model and context metadata, including hard-wrapped info lines.
