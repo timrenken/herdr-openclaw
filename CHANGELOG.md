@@ -1,0 +1,12 @@
+# Changelog
+
+## 0.2.0 - 2026-09-19
+
+- Parse OpenClaw 2026.9.4 model and context metadata, including hard-wrapped info lines.
+- Report every pane under the stable `openclaw` lifecycle label while deriving a distinct
+  display identity from the OpenClaw TUI footer.
+- Document managed, pinned Herdr installation and the supported OpenClaw version.
+
+## 0.1.0
+
+- Initial Herdr plugin for reporting OpenClaw TUI panes.

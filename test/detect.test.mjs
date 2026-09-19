@@ -56,7 +56,51 @@ const REAL_BUSY = `
 ────────────────────────────────────────────────────────────────────────
 `;
 
+// Real sanitized `herdr pane read --source detection` captures from OpenClaw 2026.9.4, 2026-09-19.
+// Conversation text and user identifiers are intentionally omitted; only the TUI footer is retained.
+const REAL_CURRENT_IDLE = `
+ connected | idle
+ agent main (Lumen) | session tui-9fcee887-2397-44e5-b391-a498de816ba0 | gpt-5.6-terra low | deliver:off | tokens
+ 114k/258k (44%)
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+`;
+
+const REAL_CURRENT_WRAPPED = `
+ connected | cleared input; press ctrl+c again to exit
+ agent amelia (amelia) | session tui-d7741028-4ab5-48f8-8a8a-6812b1e661d4 | gpt-5.6-luna max | deliver:off |
+ tokens 83k/258k (32%)
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+`;
+
 const withActivity = (a) => REAL_IDLE.replace("| idle", `| ${a}`);
+
+test("OpenClaw 2026.9.4 idle footer parses bare model/thinking and wrapped tokens", () => {
+  const s = parseOpenClawStatus(REAL_CURRENT_IDLE);
+  assert.equal(s.model, "gpt-5.6-terra");
+  assert.equal(s.think, "low");
+  assert.equal(s.tokens, "114k/258k");
+  assert.equal(s.tokenPct, 44);
+  assert.deepEqual(buildTokens(s), {
+    run: "",
+    model: "gpt-5.6-terra",
+    ctx: "114k/258k 44%",
+    think: "low",
+  });
+});
+
+test("OpenClaw 2026.9.4 wrapped footer ignores delivery metadata", () => {
+  const s = parseOpenClawStatus(REAL_CURRENT_WRAPPED);
+  assert.equal(s.model, "gpt-5.6-luna");
+  assert.equal(s.think, "max");
+  assert.equal(s.tokens, "83k/258k");
+  assert.equal(s.tokenPct, 32);
+  assert.deepEqual(buildTokens(s), {
+    run: "",
+    model: "gpt-5.6-luna",
+    ctx: "83k/258k 32%",
+    think: "max",
+  });
+});
 
 test("解析真机 idle 采样", () => {
   const s = parseOpenClawStatus(REAL_IDLE);

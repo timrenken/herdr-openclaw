@@ -5,7 +5,7 @@
 # 不照抄文档 —— 上次照抄的结果是 manifest 从未被加载过。
 id = "herdr-openclaw"
 name = "OpenClaw for Herdr"
-version = "0.1.0"
+version = "0.2.0"
 description = "Reports OpenClaw TUI panes to herdr as first-class agents."
 # 别往这里加 homepage / license 之类字段：实测 `herdr plugin link` 会**静默丢弃**
 # 不在 schema 内的键（回显里根本没有它们），留着只会让人以为它们生效了。

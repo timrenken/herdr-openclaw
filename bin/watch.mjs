@@ -26,13 +26,13 @@ import {
   showNotification,
 } from "../lib/herdr.mjs";
 import { buildStateLabels, buildTokens, parseOpenClawStatus } from "../lib/detect.mjs";
+import { formatDisplayAgent } from "../lib/identity.mjs";
 import { readConfig } from "../lib/plugin-config.mjs";
 import { applySoundPolicy, buildNotification, decideNotification } from "../lib/notify.mjs";
 
 const POLL_MS = Number(process.env.HERDR_OPENCLAW_POLL_MS ?? 1200);
 /** 发现新 OpenClaw pane 的扫描间隔。比状态轮询慢一档，见 tick() 注释。 */
 const DISCOVERY_MS = Number(process.env.HERDR_OPENCLAW_DISCOVERY_MS ?? 5000);
-const DISPLAY_AGENT = "Tony";
 // 元数据 TTL 给轮询间隔的若干倍：watcher 意外退出后，侧栏的陈旧 token 会自己消失，
 // 不会留下一个看起来还在跑、其实早没人管的面板。
 const META_TTL_MS = Math.max(POLL_MS * 8, 15000);
@@ -158,7 +158,7 @@ function syncPane(paneId, pane = null) {
   if (key !== prev?.tokensKey || stale) {
     metaAt = now;
     reportMetadata(paneId, {
-      displayAgent: DISPLAY_AGENT,
+      displayAgent: formatDisplayAgent(status),
       tokens,
       stateLabels: buildStateLabels(status),
       ttlMs: META_TTL_MS,
@@ -189,7 +189,7 @@ function discover(panes) {
     const paneId = pane.pane_id;
     if (!paneId || tracked.has(paneId)) continue;
     // 已被别的 source 认领的 pane 不碰 —— 那是 claude/codex 的地盘。
-    if (pane.agent && !["openclaw", "tony"].includes(pane.agent)) continue;
+    if (pane.agent && pane.agent !== AGENT_LABEL) continue;
     if (isOpenClawPane(paneId, pane)) found.push(paneId);
   }
   return found;

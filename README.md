@@ -22,7 +22,7 @@ verified — is in [`docs/findings-2026-08-12.md`](docs/findings-2026-08-12.md).
 ## Requirements
 
 - herdr **0.8.0+** (`pane report-agent` and friends)
-- OpenClaw **2026.7.x** (status-line format; see [Upstream drift](#upstream-drift))
+- OpenClaw **2026.9.4** (status-line format; see [Upstream drift](#upstream-drift))
 - Node **20+**
 - macOS or Windows
 - On Windows, PowerShell is required for watcher process detection; the watcher uses
@@ -31,10 +31,12 @@ verified — is in [`docs/findings-2026-08-12.md`](docs/findings-2026-08-12.md).
 ## Install
 
 ```sh
-git clone git@github.com:timrenken/herdr-openclaw.git
-herdr plugin link /path/to/herdr-openclaw --enabled
+herdr plugin install timrenken/herdr-openclaw --ref v0.2.0 --yes
 herdr server reload-config
 ```
+
+This installs a managed, pinned checkout. For local development only, clone the repository
+and use `herdr plugin link /path/to/herdr-openclaw --enabled` instead.
 
 The plugin's `[[startup]]` hook reconciles stale state and launches the watcher in the
 background. On Windows, use the same commands from PowerShell; paths may be regular
@@ -58,7 +60,10 @@ openclaw tui      # connects to the Gateway (recommended)
 openclaw chat     # alias for tui --local
 ```
 
-Within a few seconds the pane appears in `herdr agent list` as `openclaw`.
+Within a few seconds the pane appears in `herdr agent list` with the stable `openclaw`
+lifecycle label. Its display identity comes from the TUI footer, so a fleet appears as
+`Lumen (main)`, `Amelia (amelia)`, and so on; a pane without a footer identity displays as
+`OpenClaw`.
 
 Two commands you may occasionally need — note that they have **opposite** constraints:
 
@@ -221,7 +226,7 @@ and confirm three things: the pane is discovered, its state is parsed, and
 ## Development
 
 ```sh
-npm test                              # 55 tests, all pure functions
+npm test                              # parser and identity tests, all pure functions
 node bin/watch.mjs --once --verbose   # one pass, shows what it found and reported
 ```
 

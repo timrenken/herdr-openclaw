@@ -15,7 +15,7 @@ import {
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { listPanes, isOpenClawPane, releaseAgent } from "../lib/herdr.mjs";
+import { AGENT_LABEL, listPanes, isOpenClawPane, releaseAgent } from "../lib/herdr.mjs";
 import { logFile, pidFile, stateDir } from "../lib/paths.mjs";
 import { isWatcherProcess, sleepSync, terminateProcess } from "../lib/process.mjs";
 
@@ -61,7 +61,7 @@ function reconcile() {
   let released = 0;
   for (const pane of listPanes()) {
     const paneId = pane.pane_id;
-    if (!paneId || !["openclaw", "tony"].includes(pane.agent)) continue;
+    if (!paneId || pane.agent !== AGENT_LABEL) continue;
     if (isOpenClawPane(paneId, pane)) continue;
     releaseAgent(paneId);
     released += 1;
